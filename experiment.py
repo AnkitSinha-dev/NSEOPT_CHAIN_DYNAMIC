@@ -57,14 +57,15 @@ def get_dataframe(ticker, exp_date_selected):
     while True:
         try:
 
-            url = f"https://www.nseindia.com/api/option-chain-equities?symbol={ticker}"
+            url = f"https://www.nseindia.com/api/option-chain-equities?symbol=UBL"
             headers = {"accept-encoding": "gzip, deflate, br, zstd",
-                       "accept-language": "en-US,en;q=0.9",
+                       "accept-language": "en-US,en;q=0.9,hi;q=0.8",
                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-                       "cookie": '_ga=GA1.1.1104812566.1715673932; defaultLang=en; _abck=AC0A6E579954CFC1BA4A76B56A1628F3~0~YAAQUGDQFz1zGpuPAQAAwu1nnwvET9gWXigbEM0Rl8mhpwLqiPWcpkrD3EEIiDnFC85Z2A4NFLSYV4JsSD6SBY9hlP1GHG18aqKv0az9QRS8oZc9pS/EmIiFnfAV8MyVqr4PNMQpJm9HtURKFdiLWkX8NAH6Rk1zX05vNqH0oRiY345DrkxM13fYgotmDSz60pabRy5LJ0upc+lrzYbIUdE6ejKq8PlOnl/BlfUqtKvHfxGsGDUms1L+kUfgT+3SqD13cw/cHGncVK+bg8QNeU3iq95N60/cuCX94iH8W0nq6HXXlOmkNbpOjt12lx4vgvl9Qjzk57rw52r+4xwauquc6zOpoFYV6NlyH0QEN4GBonUSR77jAP3Z655ikpp9PvudOPVCVTYtdPMqOvQRRMHKswinacJDdiM=~-1~-1~-1; AKA_A2=A; nsit=U7fFh5VZGup9jnYEUfdpQYqd; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTcxNjM3Mzk3NywiZXhwIjoxNzE2MzgxMTc3fQ.upH-pnEtUzfNZA4ZSLPTTe__6kt65JAJNBurmB7f3JI; bm_mi=6B0604A54E1C1D1B04EE1E8295C9FDDA~YAAQUGDQF3XcIpuPAQAAinjcnxf6hjJs4KaJy8YTdUdVSCN4UMq8PeBUkyvt1OPVur16Z/ZuUBcZP0++UsJ3ztiXoDXBsv96tSy3z4sFIc+owixPw4kbKi7fICCa83NpllNK3k/gFNtJOdMHV6XkZnzT4NC1dosSHogGFVdQoVkc8hlZvO9gHqZuuZs1LTO1kX4JLfIcwApW7W6eFoKVUcKpkAn3IsgJauAfZdHabtbMTzqGCGdBJwJpEaEBYoCulqsZADDpnT01hk9LsCBS1sxbP+MQMLE7eislb8WruY5Lusczbcq0+vxHG0og9rkj8c+uTfAZ186lbFE=~1; bm_sz=58840284AF4EEEFBFE0AE6F85FD88B76~YAAQUGDQF3fcIpuPAQAAinjcnxcD6acSY0pck9gjHS8snofF/NHolTEqRwSpVJmjdiTfSI9XBrFdU6RqKQp3sp1FbeZg0cN5hRq7WCe1Xwgay9IdtFceZJ5dM7AhwQv7+3RwAvtRVG3XWpMBEsCei4vfuz0wWB9puxNLT5J4NXkQpU2tnV/olvgDXgYSvMrXujo9JGk0zfRdQfkWvqMBJBvSjBJpBczA2hee+ho7B3opEBzhxkpZzHdzbXkyyVmeybYIuWM2cB5QiVNp8k3Nash7cilBVltE7gzSarx1WE6h87X5goD1gzHg3mCJtkh5AEJcKPmmyMCm0uLfkjxiIxovDvGsgRfmcRpr/0up8PTCOdZuG7otaVjPXOgmzurPtlJq1HXf4g+cVvcw6vdgkF0eg9HBoOKYDiHghVcOWFVG1drbJvhGoRo5CzW1Qw==~3752244~3556675; ak_bmsc=2675DB3B33F1159AA7E283774C0D09AD~000000000000000000000000000000~YAAQUGDQFxbdIpuPAQAAIYLcnxcqNR0XpjwBQ/OPwMYgP5IO3e+X/zGxP4ncbKwaIV484t4j0qGCesashZP+7xsnF+9JqHPxfDNtqjZhFgiXhm0S0BX+NIwzfOJxp6qwIQLSOLGFnKjK5on9lYxcBiHqyzO5q7ejB3H0x55AijUpRNpTekgj2KloYw9PI5u/DQxdtH5XbdOamocYtZ5usfoAys7DIoredT9fKBtzIYzg/IibqOyB6WG6gb83tPzurUb+nW9n9PwzNPryXMUdyG6gNDhw2xrZL9FRcfgzMv+KVi7PIsvYEDsn/2Rcclu69MLqK9DmapYK/J70dx0TDHL8Mqs39g5vb6hfCri0G62nxw9Wj596i7lEQcpYYOehm0MCZ26EUvmWtquhTlGHWETABjbB73gf8y+NZkOZteOgslBuRJrob22i9/D4qjC1azY383GqhQIwuAg3ySfEMctndj5N2Ywx2FkiqulR/mO1BRLuUUbp7B1U81w4ija/Bnc=; RT="z=1&dm=nseindia.com&si=a746dd1a-fbf2-473e-a100-db75208eb944&ss=lwhoqzst&sl=0&se=8c&tt=0&bcn=%2F%2F17de4c19.akstat.io%2F&ld=1x7yk&nu=kpaxjfo&cl=ct6"; _ga_QJZ4447QD3=GS1.1.1716373840.25.0.1716373992.0.0.0; _ga_87M7PJ3R97=GS1.1.1716373840.28.1.1716373992.0.0.0; bm_sv=D07FE047787781E3E51207E354565372~YAAQUGDQFyvgIpuPAQAAc7XcnxeyWpfU6Yk+WDtJAgyPBBwx0Ow31q6XR/A0DVbgRlOqvaSnj0fWWO8DoeAGazIYD7qOvFcJnchIG9MLyByY8oLAq1OluqDYaUxANtN7tj7MkFNHvbgu4HM90eKBm9QnbtWDbaWqhchMKZtgpUTG0O6Xuu9pnCM968uZtjSqFFh2r9rlktbO7A0ndkPmwWQtRctXR8cvNyqdmmDHprXOkJYK3eRsB9Zks8WUZNsjPzQ=~1'
                       }
             session = requests.Session()
-            data = session.get(url, headers=headers).json()["records"]["data"]
+            response = session.get(url,headers=headers,timeout = 15)
+            cookies = dict(response.cookies)
+            data = session.get(url, headers=headers,cookies=cookies).json()["records"]["data"]
             ocdata = []
             for i in data:
                 for j, k in i.items():
