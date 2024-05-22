@@ -14,6 +14,22 @@ TWO_PERCENT_MARKET_PRICE = 0.0
 exchange = "NSE"
 
 
+url_oc      = "https://www.nseindia.com/option-chain"
+headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36', 'accept-language': 'en,gu;q=0.9,hi;q=0.8', 'accept-encoding': 'gzip, deflate, br'}
+sess = requests.Session()
+cookies = dict()
+
+
+
+
+def set_cookie():
+    request = sess.get(url_oc, headers=headers)
+    cookies = dict(request.cookies)
+    
+    
+    
+
+
 def last_thursdays(year):
     exp = []
     for month in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]:
@@ -54,18 +70,13 @@ def current_market_price(ticker, exchange):
 
 
 def get_dataframe(ticker, exp_date_selected):
+    set_cookie()
     while True:
         try:
 
             url = f"https://www.nseindia.com/api/option-chain-equities?symbol=UBL"
-            headers = {"accept-encoding": "gzip, deflate, br, zstd",
-                       "accept-language": "en-US,en;q=0.9,hi;q=0.8",
-                       "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-                      }
-            session = requests.Session()
-            response = session.get(url,headers=headers,timeout = 15)
-            cookies = dict(response.cookies)
-            data = session.get(url, headers=headers,cookies=cookies).json()["records"]["data"]
+     
+            data = sess.get(url, headers=headers,cookies=cookies).json()["records"]["data"]
             ocdata = []
             for i in data:
                 for j, k in i.items():
@@ -267,6 +278,27 @@ def frag_table(table_number):
     st.write(f'{ticker} LTP:', stock_ltp)
 
 
-frag_table(1)
-frag_table(2)
-frag_table(3)
+# frag_table(1)
+# frag_table(2)
+# frag_table(3)
+
+
+import requests
+
+import requests
+
+# Create a session object
+session = requests.Session()
+
+# Make an initial request to capture cookies
+response = session.get('https://www.nseindia.com')
+print("Initial cookies:", session.cookies.get_dict())
+
+# Use the same session to make further requests
+response = session.get('https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY')
+data = response.json()
+print(data)
+
+
+
+
