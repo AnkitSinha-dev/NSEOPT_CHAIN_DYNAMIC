@@ -6,28 +6,13 @@ import xlwings as xw
 from bs4 import BeautifulSoup
 import datetime
 import streamlit as st
+import csv
 
 st.set_page_config(page_title="Dashboard", layout="wide")
 
 TWO_PERCENT_MARKET_PRICE = 0.0
 
 exchange = "NSE"
-
-
-url_oc      = "https://www.nseindia.com/option-chain"
-headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36', 'accept-language': 'en,gu;q=0.9,hi;q=0.8', 'accept-encoding': 'gzip, deflate, br','cookie': '_ga=GA1.1.188925864.1709098563; _abck=090717AC8F08A622AF4C26A071A53A2C~0~YAAQBtksMTkjtZKPAQAAY9v9nwuoTOqpxMtfK32MkXluSrg07nXXlPVkKyTwFjuNq9i5QiBHuuMC2tNPW814fQHu/G4TEVCDLpfVwEm0h0P/XXXrfhfUjjgST8wIn/T4ktCu2f7YQVO/wa9lC740GhcbwoKXMcum11mGic19r/gq2Q057U2DAyjl6AwWH380UwDOYA/4EKBPOSofQC19/U5w4qMUc0W9kKsNaF9Iqrzmh6qZ5XCxatH6/GtIaPBL6SeGqIpMNI5pN6IWn9i4Bp+//2vkPtPis4jIQD+hxo09nb3BbTAUHste0YIjdw1RifG1/Xl3DtVrlwoeyGzIj5Bk4UJcXAGYGsHiAtKdAoa67lDj2wzbyEsiAUjPdbDgLje6Jm+CP9q5ru0zu39LH3NxlJkqj4LmZRr5~-1~-1~-1; AKA_A2=A; defaultLang=en; nsit=shQlaYsktVw69GeSCPeT_rz3; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTcxNjM4NTE1NiwiZXhwIjoxNzE2MzkyMzU2fQ.3_Qdw7AjvbvFH6YwpykVjQguMdUl3HaM24vlRzb9TwU; bm_mi=DC22684E2085F92F83EBC27E9839FE1C~YAAQLNksMc6Pvn2PAQAAzhOHoBeo8RUBiDc7ThmhomC6WhWjv4FPwnMBwrX8YYBdNw2aUiotX9ff1FbZcEmI2e+oOmWyaIMs/YHfpYhQr/NwEICBMmuJ0rV2BbqtOuLxMkFRlkXVqkgBsHpTNKM7dlfpJPs0mIpEjogOvO8gjNE8seYvVFbgfms+tfEeLXcq8kAH60z/db/Jv8OpWOhM7gchAIsP6ksk94b2wI25D/raOSSAuHJFNBuxxdDMk3tL9abOON/sWsAhFQD7pP/UHrcRTudjF2g0cptN4Gr8GBxgHQOk7OA4IFzKvdOYUwFjgEWyC5DMflOCSOJi~1; bm_sz=D68195DF087C7242B9711C14141DC0D7~YAAQLNksMdCPvn2PAQAAzhOHoBcO0oTjD0gu8b/sBrv8yCtddoxydFUIaHupOhbxHk6YwBDkrzZ6yxPKnBcsYbYRGKGGiL/ucsgcj44++rv8vobsQ07nUXYVKc3DHi8seGG2UgxONIFcfhtrLXGBxn20UHI6Wud7LQyVNsTob1DVEsPROW09IzjjwlV6Nxkc705Y3LRwXNqwyHOVmI881GQYJj0bJPbRZH1jgyrogF1KpNzd4Hk6NnzWbsL5TTj246yK/osLtc1Q22IBoZF2ia+wU6sx3JD1+UaqO+2E+CyA3l0SfTrK4Gff5RDcai017qC+j6BkHc3s/e+MCw05ZQimye+pvJ60qAGUzo4UY/R12HsGMkTZHrAEImup7fDg6BS/5EHPnVwxxacHq3s62Dll5HXmUoxH4Ko/PXt6swfDgwC+6aMCbhGjOTOnHQWZL7PAd9GHA85Zm63fmGpWFBib~4404547~3289138; _ga_QJZ4447QD3=GS1.1.1716385095.26.0.1716385095.0.0.0; _ga_87M7PJ3R97=GS1.1.1716385095.35.1.1716385095.0.0.0; ak_bmsc=CB5DB84F982757D43C1728EDB11CF5DD~000000000000000000000000000000~YAAQLNksMeyPvn2PAQAAIxmHoBeU3+8kwgQqgE537IJ5vVTwfiOF1XMV+pqCMblj2UXBK2cNic1jphITkicr/I+ZSidiC3O1oM+59IQzc/0kdr9tyJCJPJiDKveEY1GL19fyI5vm9hgpW7ymdJpIjglXwhrdXd7w+huc+CTb8oE405a3ZyMYn4pNHmEAQU1VVhPNPIv3lX0yAmTTYdVj6w1fH9c3LvMT3h3dAhUKUuGr1Qw1QEhIFjTKbq6wI074FOjzRsS2onTOr3i0/f0E8OHRAGxI+ZCXIYx4vx3Gyv2HS7A6gVXJKGr5IGtGAsQElHNupSNDXGq6z76G+sScwrHE2ePs2cPiZ+i8Qlu+LCniRrNumlLdRRAuxzyFJ+PPnJJwx5OWEyJIxTmbezFr9jXp4ZBy9+MlBYi84u8u1/RU5rzoU6B8EeQFBVyn81SSpI7ifFwPg+8JV+G/dmp+yW8odUsx5ntOrT7v9F42uUvdHKCNJl2YN9Bj0jv0aw==; bm_sv=02E6EAC8CFC4CB6D65EF2FBCA5BC48E0~YAAQLNksMYGQvn2PAQAABjWHoBetXvdKkq75B93Bhl0PcR/jdzOYzGEWlaHZnCzVxYlBxZ4yfXk9puWGJ/4jMKKZUGNngky6ITuE6CmjoaSpJUVGYfm30dDnoToMxJ7ipkJwJRKVJxAOlK5WIjjy/W+H3JvUAC80lWFX/YKeIuOAKb39vbjG0gwc1wh6bLw+QEMQ5a5+G5bFacwrPbctnZZz73wuadLDdW6elQSUbDhAfDnZiUzHJsHACWBjlczbDs93tA==~1; RT="z=1&dm=nseindia.com&si=b33114a2-d4ed-4b59-9f6b-6de70b0be718&ss=lwhvdaly&sl=0&se=8c&tt=0&bcn=%2F%2F684d0d46.akstat.io%2F&ld=1orzk&nu=kpaxjfo&cl=afd'}
-sess = requests.Session()
-cookies = dict()
-
-
-
-
-def set_cookie():
-    request = sess.get(url_oc, headers=headers)
-    cookies = dict(request.cookies)
-    
-    
-    
 
 
 def last_thursdays(year):
@@ -50,9 +35,20 @@ def last_thursdays(year):
         # now to get the date of the last Thursday of the month, subtract it from
         # month end date:
         df_Expiry = df_mEnd - pd.to_timedelta(offset, unit='D')
-        exp.append(df_Expiry)
+        exp.append(df_Expiry.date())
 
     return exp
+
+
+today_year = datetime.datetime.now().year
+exp_date_list = last_thursdays(today_year)
+DATE_LIST = []
+TODAY = datetime.date.today()
+for i in range(len(exp_date_list)):
+    x = (exp_date_list[i] - TODAY).days
+    if x > 0:
+        DATE_LIST.append(exp_date_list[i].strftime('%d-%m-%Y'))
+EXP_OPTION = DATE_LIST[0]
 
 
 def current_market_price(ticker, exchange):
@@ -70,13 +66,17 @@ def current_market_price(ticker, exchange):
 
 
 def get_dataframe(ticker, exp_date_selected):
-    set_cookie()
     while True:
         try:
 
-            url = f"https://www.nseindia.com/api/option-chain-equities?symbol=UBL"
-     
-            data = sess.get(url, headers=headers,cookies=cookies).json()["records"]["data"]
+            url = f"https://www.nseindia.com/api/option-chain-equities?symbol={ticker}"
+            headers = {"accept-encoding": "gzip, deflate, br, zstd",
+                       "accept-language": "en-US,en;q=0.9",
+                       "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                      
+                      }
+            session = requests.Session()
+            data = session.get(url, headers=headers).json()["records"]["data"]
             ocdata = []
             for i in data:
                 for j, k in i.items():
@@ -91,11 +91,11 @@ def get_dataframe(ticker, exp_date_selected):
             # st.range("A1").value = df
             # print(df)
 
-            expiry_dates = df['expiryDate'].unique().tolist()
-            fin_exp_dates = []
-            for i in expiry_dates:
-                temp_expiry = datetime.datetime.strptime(i, '%d-%b-%Y')
-                fin_exp_dates.append(temp_expiry.strftime('%d-%m-%Y'))
+            # expiry_dates = df['expiryDate'].unique().tolist()
+            # fin_exp_dates = []
+            # for i in expiry_dates:
+            #     temp_expiry = datetime.datetime.strptime(i, '%d-%b-%Y')
+            #     fin_exp_dates.append(temp_expiry.strftime('%d-%m-%Y'))
 
             strikes = df.strikePrice.unique().tolist()
             strike_size = int(strikes[int(len(strikes) / 2) + 1]) - int(strikes[int(len(strikes) / 2)])
@@ -213,25 +213,36 @@ def highlight_ratio(s):
             return ['background-color: white'] * len(s)
 
 
+
+
+
 @st.experimental_fragment
-def frag_table(table_number):
+def frag_table(table_number, selected_option='UBL', exp_option=EXP_OPTION):
+
     shares = pd.read_csv("FNO Stocks - All FO Stocks List, Technical Analysis Scanner.csv")
     share_list = list(shares["Symbol"])
+    selected_option = selected_option.strip()
+    share_list.remove(selected_option)
+    share_list = [selected_option] + share_list
 
-    today_year = datetime.datetime.now().year
-    exp_date_list = last_thursdays(today_year)
-    date_list = []
-    today_date = datetime.date.today()
-    for i in range(len(exp_date_list)):
-        x = (exp_date_list[i].date() - today_date).days
-        if x > 0:
-            date_list.append(exp_date_list[i].date().strftime('%d-%m-%Y'))
-    print(date_list)
+    exp_date_list_sel = DATE_LIST.copy()
+    print("LIST: ", exp_date_list_sel)
+    exp_option = datetime.datetime.strptime(exp_option, "%d-%m-%Y").date().strftime('%d-%m-%Y')
+    print("EXP_OPTION:", exp_option)
+    exp_date_list_sel.remove(exp_option)
+    exp_date_list_sel = [exp_option] + exp_date_list_sel
+    #
+    # date_list = []
+    # today_date = datetime.date.today()
+    # for i in range(len(exp_date_list)):
+    #     x = (exp_date_list[i] - today_date).days
+    #     if x > 0:
+    #         date_list.append(exp_date_list[i].strftime('%d-%m-%Y'))
     c1, c2 = st.columns(2)
     with c1:
         selected_option = st.selectbox("Share List", share_list, key="share_list" + str(table_number))
     with c2:
-        exp_option = st.selectbox("Expiry Date", date_list, key="exp_list" + str(table_number))
+        exp_option = st.selectbox("Expiry Date", exp_date_list_sel, key="exp_list" + str(table_number))
         if selected_option in share_list:
             ticker = selected_option
             output_ce, output_pe = get_dataframe(ticker, exp_option)
@@ -275,30 +286,34 @@ def frag_table(table_number):
         df = df.style.apply(highlight_ratio, axis=1)
         df = df.format(formatter="{:.2f}".format)
         st.table(df)
-    st.write(f'{ticker} LTP:', stock_ltp)
+    st.write(f'{ticker} CMP:', stock_ltp)
 
+    if ('share_list2' in st.session_state) and ('share_list3' in st.session_state):
+        curr = pd.DataFrame({'table1': [st.session_state["share_list1"]],
+                             'exp1': [st.session_state["exp_list1"]],
+                             'table2': [st.session_state["share_list2"]],
+                             'exp2': [st.session_state["exp_list2"]],
+                             'table3': [st.session_state["share_list3"]],
+                             'exp3': [st.session_state["exp_list3"]],
+                             'timestamp': [datetime.datetime.now()]
+                             })
+        if len(hist_df) > 30:
+            curr.to_csv('history.csv', mode='w', index=False, header=True)
+        else:
+            curr.to_csv('history.csv', mode='a', index=False, header=False)
 
-# frag_table(1)
-# frag_table(2)
-# frag_table(3)
+hist = pd.read_csv("history.csv")
+hist_df = pd.DataFrame(hist)
 
+print(len(hist_df))
 
-import requests
-
-import requests
-
-# Create a session object
-session = requests.Session()
-
-# Make an initial request to capture cookies
-response = session.get('https://www.nseindia.com')
-print("Initial cookies:", session.cookies.get_dict())
-
-# Use the same session to make further requests
-response = session.get('https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY')
-data = response.json()
-print(data)
-
-
-
-
+if len(hist_df) > 0:
+    last_rec = hist_df.tail(1)
+    print(last_rec)
+    frag_table(1, last_rec['table1'].item(), last_rec['exp1'].item())
+    frag_table(2, last_rec['table2'].item(), last_rec['exp2'].item())
+    frag_table(3, last_rec['table3'].item(), last_rec['exp3'].item())
+else:
+    frag_table(1)
+    frag_table(2)
+    frag_table(3)
